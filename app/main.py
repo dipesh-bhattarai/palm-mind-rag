@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from app.core.config import get_settings
 from app.db.database import init_db
+from app.api.routes.ingestion import router as ingestion_router
 
 settings = get_settings()
 
@@ -27,6 +28,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(ingestion_router)
 
 @app.get("/", tags=["Health"])
 def root() -> dict[str, str]:

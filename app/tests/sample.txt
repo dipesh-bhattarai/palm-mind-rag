@@ -1,0 +1,17 @@
+Create a small file named sample.txt.
+
+
+
+Add a few paragraphs of text.
+
+
+
+Open the endpoint in Swagger and click Try it out.
+
+
+
+Upload sample.txt and select recursive.
+
+
+
+Click Execute.
