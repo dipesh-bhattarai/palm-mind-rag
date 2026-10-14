@@ -25,3 +25,7 @@ groq
 # Testing
 pytest
 httpx
+
+
+#langchain
+langchain-groq
