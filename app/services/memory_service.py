@@ -44,4 +44,31 @@ class ConversationMemory:
         return bool(self.client.ping())
 
 
+    def get_booking_draft(self, session_id: str) -> dict | None:
+        """Retrieve an in-progress booking draft."""
+        key = f"booking_draft:{session_id}"
+        draft = self.client.get(key)
+        if draft is None:
+            return None
+        return json.loads(draft)
+
+    def save_booking_draft(
+        self,
+        session_id: str,
+        draft: dict,
+    ) -> None:
+        """Persist an in-progress booking draft for 24 hours."""
+        key = f"booking_draft:{session_id}"
+        self.client.set(
+            key,
+            json.dumps(draft),
+            ex=86400,
+        )
+
+    def clear_booking_draft(self, session_id: str) -> None:
+        """Remove a booking draft after completion or cancellation."""
+        self.client.delete(f"booking_draft:{session_id}")
+
+
+
 conversation_memory = ConversationMemory()
