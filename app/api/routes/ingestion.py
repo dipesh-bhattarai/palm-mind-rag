@@ -7,10 +7,12 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Document
+from app.repositories.vector_repository import vector_repository
 from app.schemas.documents import (
     ChunkingStrategy,
     DocumentUploadResponse,
 )
+from app.services.embedding_service import embedding_service
 from app.services.ingestion_service import process_document
 
 router = APIRouter(prefix="/api/v1/documents", tags=["Documents"])
@@ -28,7 +30,8 @@ def upload_document(
     chunking_strategy: ChunkingStrategy = Form("recursive"),
     db: Session = Depends(get_db),
 ) -> DocumentUploadResponse:
-    """Upload a PDF/TXT file and process its text."""
+    """Upload a PDF/TXT file, create embeddings, and store chunks."""
+
     filename = file.filename or "document"
 
     if not filename.lower().endswith((".pdf", ".txt")):
@@ -38,6 +41,7 @@ def upload_document(
         )
 
     file_type = filename.rsplit(".", 1)[-1].lower()
+    document_id = str(uuid4())
 
     try:
         file_bytes = file.file.read(MAX_FILE_SIZE + 1)
@@ -54,6 +58,21 @@ def upload_document(
             strategy=chunking_strategy,
         )
 
+        if not chunks:
+            raise HTTPException(
+                status_code=422,
+                detail="No text chunks could be extracted from this file.",
+            )
+
+        embeddings = embedding_service.embed_documents(chunks)
+
+        vector_repository.store_chunks(
+            document_id=document_id,
+            filename=filename,
+            chunks=chunks,
+            embeddings=embeddings,
+        )
+
     except HTTPException:
         raise
     except (ValueError, UnicodeDecodeError) as exc:
@@ -63,20 +82,21 @@ def upload_document(
         ) from exc
     except Exception as exc:
         raise HTTPException(
-            status_code=422,
-            detail="Unable to extract text from this file.",
+            status_code=500,
+            detail=(
+                "Document processing or vector storage failed. "
+                "Check that the embedding model and Qdrant are available."
+            ),
         ) from exc
     finally:
         file.file.close()
-
-    document_id = str(uuid4())
 
     document = Document(
         id=document_id,
         filename=filename,
         file_type=file_type,
         chunking_strategy=chunking_strategy,
-        status="text_extracted",
+        status="completed",
     )
 
     try:
