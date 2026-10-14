@@ -1,0 +1,27 @@
+
+# API framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Configuration and validation
+pydantic-settings
+email-validator
+
+# Database
+sqlalchemy
+
+# Vector database and conversation memory
+qdrant-client
+redis
+
+# Document processing and embeddings
+pymupdf
+sentence-transformers
+
+# LLM API
+groq
+
+# Testing
+pytest
+httpx
