@@ -1,4 +1,4 @@
-
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -9,6 +9,7 @@ from app.services.memory_service import conversation_memory
 from app.services.rag_service import answer_question
 
 router = APIRouter(prefix="/api/v1/chat", tags=["Chat"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("")
@@ -73,6 +74,7 @@ def chat(
             detail=str(exc),
         ) from exc
     except Exception as exc:
+        logger.exception("Chat request failed")
         raise HTTPException(
             status_code=500,
             detail="The chat request could not be processed.",
