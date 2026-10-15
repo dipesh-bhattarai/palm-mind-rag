@@ -2,7 +2,6 @@
 from datetime import date
 
 from app.schemas.booking import BookingIntent
-from app.services.rag_service import get_llm
 
 
 def extract_booking_intent(
@@ -48,6 +47,6 @@ Conversation history:
 Current message:
 {question}
 """
-
+    from app.services.rag_service import get_llm
     structured_llm = get_llm().with_structured_output(BookingIntent)
     return structured_llm.invoke(prompt)
