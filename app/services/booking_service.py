@@ -1,8 +1,9 @@
-
 from datetime import date, time
+
 from sqlalchemy.orm import Session
 
 from app.db.models import Booking
+from app.repositories.booking_repository import booking_repository
 
 
 def create_booking(
@@ -26,20 +27,10 @@ def create_booking(
     if interview_date < date.today():
         raise ValueError("Interview date cannot be in the past.")
 
-    booking = Booking(
+    return booking_repository.create(
+        db=db,
         name=name,
         email=email,
         interview_date=interview_date,
         interview_time=interview_time,
-        status="requested",
     )
-
-    try:
-        db.add(booking)
-        db.commit()
-        db.refresh(booking)
-    except Exception:
-        db.rollback()
-        raise
-
-    return booking

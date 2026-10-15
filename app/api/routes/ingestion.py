@@ -14,6 +14,7 @@ from app.schemas.documents import (
 )
 from app.services.embedding_service import embedding_service
 from app.services.ingestion_service import process_document
+from app.repositories.document_repository import document_repository
 
 router = APIRouter(prefix="/api/v1/documents", tags=["Documents"])
 
@@ -91,7 +92,7 @@ def upload_document(
     finally:
         file.file.close()
 
-    document = Document(
+        document = Document(
         id=document_id,
         filename=filename,
         file_type=file_type,
@@ -100,11 +101,8 @@ def upload_document(
     )
 
     try:
-        db.add(document)
-        db.commit()
-        db.refresh(document)
+        document_repository.create(db, document)
     except SQLAlchemyError as exc:
-        db.rollback()
         raise HTTPException(
             status_code=500,
             detail="Failed to save document metadata.",
