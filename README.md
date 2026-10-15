@@ -1,4 +1,3 @@
- @'
 # Palm Mind RAG API
 
 A modular FastAPI backend for document ingestion, retrieval-augmented generation (RAG), conversational memory, and interview booking.
@@ -256,4 +255,3 @@ The default SQLite database file and local Qdrant storage are runtime data and a
 - LLM-dependent endpoints require a valid Groq API key and network access.
 - This repository provides a backend API; it does not include a frontend.
 - The Docker Compose file starts Qdrant and Redis. The FastAPI application is started separately with Uvicorn.
-'@ | Set-Content -Encoding utf8 README.md
